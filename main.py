@@ -73,11 +73,13 @@ class PencilsClaimer:
                 self.amount_tokens += float(response_json['token'])
                 total_tokens += self.amount_tokens
                 logger.success(f"{self.account.address} Congrats u eligible for {self.amount_tokens} tokens")
-                return await PencilsClaimer.claim_on_cex(self)
+                if self.bybit_address is not None:
+                    return await PencilsClaimer.claim_on_cex(self)
             elif len(response_json) > 4:
                 total_tokens += float(response_json['token'])
                 logger.info(f"{self.account.address} already claimed {float(response_json['token'])} tokens")
                 return
+        return
         # raise Exception(f'Check_eligible: response {response.text}')
 
     async def claim_on_cex(self) -> None:
@@ -153,7 +155,9 @@ if __name__ == '__main__':
     total_tokens: float = 0
     accounts: list[list] = [
         [
-            row["Private Key"], row["BybitUID"], row["BybitAddress"],
+            row["Private Key"], 
+            row["BybitUID"] if isinstance(row["BybitUID"], str) else None, 
+            row["BybitAddress"] if isinstance(row["BybitAddress"], str) else None,
             row["Proxy"] if isinstance(row["Proxy"], str) else None
         ]
         for index, row in exel.iterrows()
